@@ -75,24 +75,14 @@ void ssd1306_command(unsigned char command) {
 }
 
 
-void ssd1306_clearDisplay(void) {
-    ssd1306_setFrame(0, 7, 0, 127);
-
-    uint8_t i, x;
-
-    for (i = 64; i > 0; i--) {   // count down for loops when possible for ULP
-        for(x = 16; x > 0; x--) {
-            if (x == 1) {
-                buffer[x-1] = 0x40;
-            } else {
-                buffer[x-1] = 0x0;
-            }
-        }
-
-        i2c_write(buffer, 17);
-    }
+void ssd1306_setFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end) {
+    ssd1306_command(SSD1306_PAGEADDR);  // Command to set page range (limits: 0 to 7)
+    ssd1306_command(page_start);        // Page start address
+    ssd1306_command(page_end);          // Page end address
+    ssd1306_command(SSD1306_COLUMNADDR);// Command to set column range (limits: 0 to 127)
+    ssd1306_command(col_start);         // Column start address
+    ssd1306_command(col_end);           // Column end address
 }
-
 
 void ssd1306_clearFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end) {
     uint8_t i, j, totalPages, totalColumns;
@@ -113,13 +103,22 @@ void ssd1306_clearFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start,
 }
 
 
-void ssd1306_setFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end) {
-    ssd1306_command(SSD1306_PAGEADDR);  // Command to set page range (limits: 0 to 7)
-    ssd1306_command(page_start);        // Page start address
-    ssd1306_command(page_end);          // Page end address
-    ssd1306_command(SSD1306_COLUMNADDR);// Command to set column range (limits: 0 to 127)
-    ssd1306_command(col_start);         // Column start address
-    ssd1306_command(col_end);           // Column end address
+void ssd1306_clearDisplay(void) {
+    ssd1306_setFrame(SSD1306_PAGE_START, SSD1306_PAGE_END, SSD1306_COL_START, SSD1306_COL_END);
+
+    uint8_t i, x;
+
+    for (i = 64; i > 0; i--) {   // count down for loops when possible for ULP
+        for(x = 16; x > 0; x--) {
+            if (x == 1) {
+                buffer[x-1] = 0x40;
+            } else {
+                buffer[x-1] = 0x0;
+            }
+        }
+
+        i2c_write(buffer, 17);
+    }
 }
 
 
@@ -132,27 +131,21 @@ void ssd1306_setPosition(uint8_t page_start, uint8_t col_start) {
 }
 
 
-void ssd1306_drawFullScreen(unsigned char *bitmap) {
-    ssd1306_setPosition(0, 0);
+void ssd1306_drawFrameBitmap(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end, uint16_t bitmap_bytes, const unsigned char *bitmap) {
+   ssd1306_setFrame(page_start, page_end, col_start, col_end);
 
-   uint16_t index=0;
-   uint8_t row, col, count;
+   uint16_t i, j=0;
 
-   for(row=64; row>0; row--) {
-       count=1;
+   buffer[0]=0x40;
 
-       for(col=16; col>0; col--) {
-           buffer[count++]=bitmap[index++];
-       }
-
-       buffer[0]=0x40;
-
-       i2c_write(buffer, 17);
+   for(i=bitmap_bytes; i>0; i--) {
+       buffer[1]=bitmap[j++];
+       i2c_write(buffer, 2);
    }
 }
 
 
-void ssd1306_drawNumber(uint8_t number) {
+void ssd1306_drawNumberBitmap(uint8_t number) {
    uint16_t index=0;
    uint8_t row, col, count;
 
@@ -167,6 +160,51 @@ void ssd1306_drawNumber(uint8_t number) {
 
        i2c_write(buffer, 19);
    }
+}
+
+void ssd1306_drawValue(uint8_t page_start, uint8_t page_end, uint8_t number) {
+    uint8_t c, d, u;
+
+    c=number/100;
+    d=(number%100)/10;
+    u=(number%100)%10;
+
+    if(c > 0) {
+        ssd1306_setFrame(page_start,
+                         page_end,
+                         BITMAP_HUNDRED_COL_START,
+                         BITMAP_HUNDRED_COL_END);
+
+        ssd1306_drawNumberBitmap(c);
+    }
+    else {
+        ssd1306_clearFrame(page_start,
+                           page_end,
+                           BITMAP_HUNDRED_COL_START,
+                           BITMAP_HUNDRED_COL_END);
+    }
+
+    if(d > 0 || c > 0) {
+        ssd1306_setFrame(page_start,
+                         page_end,
+                         BITMAP_TEN_COL_START,
+                         BITMAP_TEN_COL_END);
+
+        ssd1306_drawNumberBitmap(d);
+    }
+    else {
+        ssd1306_clearFrame(page_start,
+                           page_end,
+                           BITMAP_TEN_COL_START,
+                           BITMAP_TEN_COL_END);
+    }
+
+    ssd1306_setFrame(page_start,
+                     page_end,
+                     BITMAP_UNITY_COL_START,
+                     BITMAP_UNITY_COL_END);
+
+    ssd1306_drawNumberBitmap(u);
 }
 
 

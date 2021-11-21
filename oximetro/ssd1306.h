@@ -93,8 +93,9 @@ void ssd1306_clearDisplay(void);
 void ssd1306_setPosition(uint8_t page_start, uint8_t col_start);
 void ssd1306_setFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end);
 void ssd1306_clearFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end);
-void ssd1306_drawFullScreen(unsigned char *bitmap);
-void ssd1306_drawNumber(uint8_t number);
+void ssd1306_drawFrameBitmap(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end, uint16_t bitmap_bytes , const unsigned char *bitmap);
+void ssd1306_drawNumberBitmap(uint8_t number);
+void ssd1306_drawValue(uint8_t page_start, uint8_t page_end, uint8_t number);
 void ssd1306_printText(uint8_t page_start, uint8_t col_start, char *ptString);
 
 void ssd1306_printTextBlock(uint8_t, uint8_t, char *);

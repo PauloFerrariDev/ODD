@@ -79,7 +79,7 @@ int main(void)
     clock_init();
     i2c_init();                                 // initialize UCB1 I2C, port 4 pins 1, 2
     ssd1306_init();                             // initialize SSD1306 OLED
-    ssd1306_clearDisplay();                     // clear garbage data
+    ssd1306_clearDisplay();                     // clear SSD1306 OLED garbage data
     InitTimerA1();
     __bis_SR_register(GIE);
 
@@ -91,59 +91,62 @@ int main(void)
 // ***** End Initialization  *****
 
 // ************************** DISPLAY (START) ***********************
+// ************************** DISPLAY (START) ***********************
 
      uint16_t i=0;
 
-     ssd1306_drawFullScreen(bitmap_UTFPR);
+     // Print UTFPR logo bitmap
+     ssd1306_drawFrameBitmap(BITMAP_LOGO_PAGE_START,
+                             BITMAP_LOGO_PAGE_END,
+                             BITMAP_LOGO_COL_START,
+                             BITMAP_LOGO_COL_END,
+                             BITMAP_LOGO_BYTES,
+                             BITMAP_LOGO_DATA);
 
      RETime=0;
-     while (RETime < 200 ); // aguarda 2000ms
+     while (RETime < 300 ); // aguarda 3000ms
 
      ssd1306_clearDisplay();
 
-     ssd1306_drawFullScreen(bitmap_layout);
+     // Print Layout SpO2 and PRbpm bitmap
+     ssd1306_drawFrameBitmap(BITMAP_LAYOUT_PAGE_START,
+                             BITMAP_LAYOUT_PAGE_END,
+                             BITMAP_LAYOUT_COL_START,
+                             BITMAP_LAYOUT_COL_END,
+                             BITMAP_LAYOUT_BYTES,
+                             BITMAP_LAYOUT_DATA);
 
-    i = 0;
     while (1) {
-        // APAGAR A PARITR DA COLUNA 75 SEMPRE
-//        ssd1306_clearFrame(0, 7, 75, 127);
+        // Print SpO2 value
+        ssd1306_drawValue(BITMAP_SPO2_VALUE_PAGE_START,
+                          BITMAP_SPO2_VALUE_PAGE_END,
+                          i);
 
-        ssd1306_setFrame(0, 2, 74, 91);
-        ssd1306_drawNumber(i);
-        ssd1306_setFrame(0, 2, 92, 109);
-        ssd1306_drawNumber(i);
-        ssd1306_setFrame(0, 2, 110, 127);
-        ssd1306_drawNumber(i);
+        // Print PRbpm value
+        ssd1306_drawValue(BITMAP_PRBPM_VALUE_PAGE_START,
+                          BITMAP_PRBPM_VALUE_PAGE_END,
+                          i);
 
-        ssd1306_setFrame(5, 7, 74, 91);
-        ssd1306_drawNumber(i);
-        ssd1306_setFrame(5, 7, 92, 109);
-        ssd1306_drawNumber(i);
-        ssd1306_setFrame(5, 7, 110, 127);
-        ssd1306_drawNumber(i);
-
-        RETime = 0;
-        while (RETime < 400); // aguarda 4000ms
         i++;
-        if(i==10) i = 0;
+        if(i==256) i=0;
     }
 
+// ************************** DISPLAY (END) ***********************
 // ************************** DISPLAY (END) ***********************
 
      MAX_ON;
      RETime=0;
      while (RETime < 4 ); //aguarda 40ms
      initI2C_max();
-     maxim_max30102_reset ();
+     maxim_max30102_reset();
      MAX5V_ON;
      RETime=0;
      while (RETime < 4 ); //aguarda 40ms
-     maxim_max30102_init ();
+     maxim_max30102_init();
 
      n_ir_buffer_length = 100;
 
-     for(i = 0; i < n_ir_buffer_length;i++)
-     {
+     for(i=0; i<n_ir_buffer_length; i++) {
          RETime=0;
          while (RETime < 2 ); //aguarda 10ms
          maxim_max30102_read_fifo((aun_red_buffer + i),(aun_ir_buffer + i));
@@ -157,10 +160,10 @@ int main(void)
       ssd1306_printUI32(0,4,n_heart_rate, HCENTERUL_ON);
 
 
-     while(!PFLOW.Bit.DesligaTudo){
+     while(!PFLOW.Bit.DesligaTudo) {
 
          // a cada 20ms
-         if(PFLOW.Bit.t20ms){
+         if(PFLOW.Bit.t20ms) {
              PFLOW.Bit.t20ms=0;
              //delete oldest 25 sample (0 - 24), and shift the samples to the left
               i = 25;
@@ -190,9 +193,6 @@ int main(void)
               ssd1306_printUI32(0,4,n_heart_rate, HCENTERUL_ON);
 
          }
-
-
-
      }
 
 
