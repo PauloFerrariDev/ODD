@@ -2,7 +2,7 @@
  * ssd1306.h
  *
  *  Created on: May 23, 2019
- *      Author: samper
+ *  Author: samper
  */
 
 #ifndef SSD1306_H_
@@ -13,7 +13,7 @@
 #include <string.h>
 #include "i2c.h"
 
-unsigned char buffer[17];                       // buffer for data transmission to screen
+unsigned char buffer[32];  // buffer for data (caractere) transmission to screen
 
 /* ====================================================================
  * Horizontal Centering Number Array
@@ -29,7 +29,12 @@ unsigned char buffer[17];                       // buffer for data transmission 
 
 #define SSD1306_LCDWIDTH                128
 #define SSD1306_LCDHEIGHT               64
-#define SSD1306_128_64
+
+#define SSD1306_PAGE_START  0
+#define SSD1306_PAGE_END   ((SSD1306_LCDHEIGHT / 8) - 1)
+#define SSD1306_COL_START   0
+#define SSD1306_COL_END    (SSD1306_LCDWIDTH - 1)
+
 
 #define SSD1306_SETCONTRAST             0x81
 #define SSD1306_DISPLAYALLON_RESUME     0xA4
@@ -84,13 +89,16 @@ unsigned char buffer[17];                       // buffer for data transmission 
 void ssd1306_init(void);
 void ssd1306_command(unsigned char);
 void ssd1306_clearDisplay(void);
-void ssd1306_setPosition(uint8_t, uint8_t);
-void ssd1306_printText(uint8_t, uint8_t, char *);
-void ssd1306_drawBitmapUTFPR(void);
-void ssd1306_drawBitmap(void);
+
+void ssd1306_setPosition(uint8_t page_start, uint8_t col_start);
+void ssd1306_setFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end);
+void ssd1306_clearFrame(uint8_t page_start, uint8_t page_end, uint8_t col_start, uint8_t col_end);
+void ssd1306_drawFullScreen(unsigned char *bitmap);
+void ssd1306_drawNumber(uint8_t number);
+void ssd1306_printText(uint8_t page_start, uint8_t col_start, char *ptString);
+
 void ssd1306_printTextBlock(uint8_t, uint8_t, char *);
 void ssd1306_printUI32(uint8_t, uint8_t, uint32_t, uint8_t);
-
 uint8_t digits(uint32_t);
 void ultoa(uint32_t, char *);
 void reverse(char *);

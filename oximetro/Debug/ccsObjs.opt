@@ -1,1 +1,1 @@
-"./clock.obj" "./i2c.obj" "./main.obj" "./ssd1306.obj" "../lnk_msp430f5529.cmd" -llibmath.a -llibc.a 
+"./OxTimer.obj" "./algorithm.obj" "./clock.obj" "./i2c.obj" "./main.obj" "./max30102.obj" "./ssd1306.obj" "../lnk_msp430f5529.cmd" -llibmath.a -llibc.a 

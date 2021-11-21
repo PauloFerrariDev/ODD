@@ -10,9 +10,12 @@ GEN_OPTS__FLAG :=
 GEN_CMDS__FLAG := 
 
 ORDERED_OBJS += \
+"./OxTimer.obj" \
+"./algorithm.obj" \
 "./clock.obj" \
 "./i2c.obj" \
 "./main.obj" \
+"./max30102.obj" \
 "./ssd1306.obj" \
 "../lnk_msp430f5529.cmd" \
 $(GEN_CMDS__FLAG) \
@@ -158,8 +161,8 @@ oximetro.hex: $(EXE_OUTPUTS)
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "clock.obj" "i2c.obj" "main.obj" "ssd1306.obj" 
-	-$(RM) "clock.d" "i2c.d" "main.d" "ssd1306.d" 
+	-$(RM) "OxTimer.obj" "algorithm.obj" "clock.obj" "i2c.obj" "main.obj" "max30102.obj" "ssd1306.obj" 
+	-$(RM) "OxTimer.d" "algorithm.d" "clock.d" "i2c.d" "main.d" "max30102.d" "ssd1306.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
